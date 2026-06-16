@@ -1,0 +1,1433 @@
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { gsap } from "gsap";
+
+const eventList = [
+  {
+    id: 1,
+    title: "Doctor's Day",
+    date: "2025-07-01",
+    displayDate: "1 JULY 2025",
+  },
+  {
+    id: 2,
+    title: "Paddy Planting (Rice Plantation)",
+    date: "2025-07-20",
+    displayDate: "20 JULY 2025",
+  },
+  {
+    id: 3,
+    title: "Tree Plantation",
+    date: "2025-08-01",
+    displayDate: "AUGUST 2025",
+  },
+  {
+    id: 4,
+    title: "Govinda Celebration",
+    date: "2025-08-14",
+    displayDate: "14 AUGUST 2025",
+  },
+  {
+    id: 5,
+    title: "MEDICAL CAMP",
+    date: "2025-08-17",
+    displayDate: "17 AUGUST 2025",
+  },
+  {
+    id: 6,
+    title: "12th President Inauguration",
+    date: "2025-08-17",
+    displayDate: "17 AUGUST 2025",
+  },
+  {
+    id: 7,
+    title: "Ganpati Visarjan Chass Distribution",
+    date: "2025-09-02",
+    displayDate: "2 SEP 2025",
+  },
+  {
+    id: 8,
+    title: "Ganpati Visarjan Chass Distribution",
+    date: "2025-09-06",
+    displayDate: "6 SEP 2025",
+  },
+  {
+    id: 9,
+    title: "Ladies Picnic",
+    date: "2025-09-16",
+    displayDate: "16 SEP 2025",
+  },
+  {
+    id: 10,
+    title: "Men's Tour - Goa",
+    date: "2025-09-19",
+    displayDate: "19 SEP 2025",
+  },
+  {
+    id: 11,
+    title: "Navratri Celebration",
+    date: "2025-09-28",
+    displayDate: "28 SEP 2025",
+  },
+  {
+    id: 12,
+    title: "Dhavir Maharaj Palkhi Sohala - Chass Distribution",
+    date: "2025-10-03a",
+    displayDate: "3 OCT 2025",
+  },
+  {
+    id: 13,
+    title: "Dhavir Maharaj Palkhi Sohala - Dhokla 51 KG Distribution",
+    date: "2025-10-03b",
+    displayDate: "3 OCT 2025",
+  },
+  {
+    id: 14,
+    title: "Dhavir Maharaj Palkhi Sohala - Idli 4000 Pieces Distribution",
+    date: "2025-10-04",
+    displayDate: "4 OCT 2025",
+  },
+  {
+    id: 15,
+    title: "Blood Donation",
+    date: "2025-10-07",
+    displayDate: "7 OCT 2025",
+  },
+  {
+    id: 16,
+    title: "Killa Primary School Cupboard Distribution",
+    date: "2025-10-15",
+    displayDate: "15 OCT 2025",
+  },
+  {
+    id: 17,
+    title: "Membership Orientation - Dr. Parmar",
+    date: "2025-10-20",
+    displayDate: "OCT 2025",
+  },
+  {
+    id: 18,
+    title: "Bicycle Distribution - ZP School Mhasali (4 Cycles)",
+    date: "2025-11-14a",
+    displayDate: "14 NOVEMBER 2025",
+  },
+  {
+    id: 19,
+    title: "Bicycle Distribution - ZP School Barpe (3 Cycles)",
+    date: "2025-11-14b",
+    displayDate: "14 NOVEMBER 2025",
+  },
+  {
+    id: 20,
+    title: "Bicycle Distribution - ZP School Mahagaov (7 Cycles)",
+    date: "2025-11-14c",
+    displayDate: "14 NOVEMBER 2025",
+  },
+  {
+    id: 21,
+    title: "Socializing",
+    date: "2025-11-27",
+    displayDate: "27 NOVEMBER 2025",
+  },
+  {
+    id: 22,
+    title: "New Year Celebration",
+    date: "2025-12-31",
+    displayDate: "31 DECEMBER 2025",
+  },
+  {
+    id: 23,
+    title: "Calendar Opening",
+    date: "2026-01-01",
+    displayDate: "1 JAN 2026",
+  },
+  {
+    id: 24,
+    title: "Sanegaon Ashram School Water Tank Donation",
+    date: "2026-01-09",
+    displayDate: "9 JAN 2026",
+  },
+  {
+    id: 25,
+    title: "Rotary Popti Party",
+    date: "2026-01-21",
+    displayDate: "21 JAN 2026",
+  },
+  {
+    id: 26,
+    title: "Sinhagad Fort Tour - Durga Abhas Mohim",
+    date: "2026-02-01",
+    displayDate: "1 FEB 2026",
+  },
+  {
+    id: 27,
+    title: "Raigad Jillha Parished School - Navkhar Donated Chair & Table",
+    date: "2026-02-27",
+    displayDate: "27 FEB 2026",
+  },
+  {
+    id: 28,
+    title: "Rotary Club Deccan Jimkhana Pune Donated Laptops to 5 Girls",
+    date: "2026-03-06",
+    displayDate: "6 MAR 2026",
+  },
+  {
+    id: 29,
+    title: "Women's Day Saree Distribution by Godrej & Rotary Club of Roha",
+    date: "2026-03-08",
+    displayDate: "8 MAR 2026",
+  },
+];
+
+const events = eventList.map((ev) => ({
+  ...ev,
+  images: [1, 2, 3, 4].map((n) => `/media/events/${ev.id}/img${n}.jpg`),
+}));
+
+const slideStructure = [
+  { type: "title" },
+  { type: "anthem" },
+  { type: "guests" },
+  { type: "profile-video" },
+  { type: "events-intro" },
+  ...events.map((ev) => ({ type: "event", data: ev })),
+  { type: "thanks" },
+];
+
+const TOTAL = slideStructure.length;
+
+const STYLES = `
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #f4efe6;
+  --bg-soft: #efe7da;
+  --surface: rgba(255, 250, 242, 0.72);
+  --surface-strong: rgba(255, 249, 240, 0.9);
+  --surface-dark: rgba(59, 44, 29, 0.12);
+  --text: #2e2418;
+  --text-soft: #6f5a44;
+  --text-faint: #9b866e;
+  --accent: #8c5b2f;
+  --accent-2: #c78d4d;
+  --accent-3: #5d7d63;
+  --line: rgba(122, 91, 57, 0.18);
+  --shadow: 0 24px 70px rgba(78, 53, 28, 0.16);
+  --radius-xl: 32px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --timeline-w: 294px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body, #root { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(199, 141, 77, 0.18), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(93, 125, 99, 0.12), transparent 28%),
+    linear-gradient(145deg, #f7f2ea 0%, #eee4d3 48%, #f6efe5 100%);
+}
+h1, h2, h3 { font-family: "Cormorant Garamond", serif; }
+button { font: inherit; }
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(199, 141, 77, 0.18), transparent 25%),
+    radial-gradient(circle at 85% 12%, rgba(140, 91, 47, 0.10), transparent 22%),
+    radial-gradient(circle at 80% 85%, rgba(93, 125, 99, 0.16), transparent 22%),
+    linear-gradient(135deg, #f8f2e8 0%, #eee1cc 45%, #f7f0e5 100%);
+}
+
+.app::before,
+.app::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.app::before {
+  inset: 12px;
+  border: 1px solid rgba(140, 91, 47, 0.16);
+  border-radius: 30px;
+}
+
+.app::after {
+  inset: 28px;
+  border-radius: 26px;
+  background:
+    linear-gradient(120deg, rgba(255,255,255,0.16), transparent 30%),
+    linear-gradient(300deg, rgba(140, 91, 47, 0.05), transparent 30%);
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 42px;
+  text-align: center;
+}
+
+.nav-arrow {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 120;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(140, 91, 47, 0.18);
+  background: rgba(255, 251, 245, 0.72);
+  color: var(--accent);
+  backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(92, 62, 35, 0.12);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.nav-arrow:hover { transform: translateY(-50%) scale(1.06); background: rgba(255, 248, 239, 0.95); color: var(--accent-2); }
+.nav-arrow.left { left: 22px; }
+.nav-arrow.right { right: 22px; }
+
+.top-bar {
+  position: fixed;
+  top: 18px;
+  left: 0;
+  right: 0;
+  z-index: 120;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+.top-bar > * { pointer-events: auto; }
+
+.top-bar-btn,
+.slide-counter {
+  border-radius: 999px;
+  padding: 10px 18px;
+  border: 1px solid rgba(140, 91, 47, 0.16);
+  background: rgba(255, 250, 244, 0.74);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 24px rgba(88, 57, 30, 0.08);
+}
+.top-bar-btn {
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.top-bar-btn:hover { background: rgba(255, 248, 239, 0.95); }
+.slide-counter { color: var(--text-soft); font-size: 13px; font-weight: 700; min-width: 84px; }
+
+.progress-bar-track {
+  position: fixed;
+  left: 20px;
+  right: 20px;
+  bottom: 16px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(122, 91, 57, 0.12);
+  overflow: hidden;
+  z-index: 120;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), #d8b07d);
+  box-shadow: 0 0 20px rgba(199, 141, 77, 0.35);
+  transition: width 0.4s ease;
+}
+
+.emblem {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  font-size: 44px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(140, 91, 47, 0.24);
+  background: radial-gradient(circle, rgba(255,255,255,0.85), rgba(255,255,255,0.45));
+  box-shadow: 0 12px 36px rgba(108, 72, 38, 0.12), inset 0 0 0 10px rgba(199, 141, 77, 0.08);
+}
+
+.title-slide {
+  position: relative;
+  overflow: hidden;
+  padding: 72px 72px 56px;
+}
+.title-slide::before,
+.title-slide::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(6px);
+  opacity: 0.42;
+}
+.title-slide::before {
+  width: 360px;
+  height: 360px;
+  top: -90px;
+  right: -70px;
+  background: radial-gradient(circle, rgba(199,141,77,0.34), rgba(199,141,77,0));
+}
+.title-slide::after {
+  width: 280px;
+  height: 280px;
+  bottom: -70px;
+  left: -40px;
+  background: radial-gradient(circle, rgba(93,125,99,0.24), rgba(93,125,99,0));
+}
+.title-panel {
+  position: relative;
+  z-index: 2;
+  width: min(1120px, 100%);
+  min-height: min(78vh, 760px);
+  padding: 48px 56px;
+  border-radius: 36px;
+  text-align: left;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 34px;
+  align-items: stretch;
+  background: linear-gradient(145deg, rgba(255,251,245,0.88), rgba(255,247,238,0.68));
+  border: 1px solid rgba(140, 91, 47, 0.14);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+.title-copy { display: flex; flex-direction: column; justify-content: center; }
+.title-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+.title-kicker::before {
+  content: "";
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+.title-slide h1 {
+  font-size: clamp(3.4rem, 5vw, 5.6rem);
+  line-height: 0.94;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.title-slide h1 .accent { color: var(--accent); }
+.title-slide h2 {
+  font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+  color: var(--text-soft);
+  margin-bottom: 18px;
+}
+.title-description {
+  max-width: 620px;
+  color: var(--text-soft);
+  font-size: 16px;
+  line-height: 1.8;
+  margin-bottom: 26px;
+}
+.title-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.meta-pill {
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(140, 91, 47, 0.07);
+  border: 1px solid rgba(140, 91, 47, 0.12);
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+.title-side {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 16px;
+}
+.title-art {
+  position: relative;
+  overflow: hidden;
+  border-radius: 30px;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255,255,255,0.9), transparent 26%),
+    radial-gradient(circle at 75% 75%, rgba(199,141,77,0.32), transparent 28%),
+    linear-gradient(155deg, rgba(255,251,247,0.95), rgba(236,224,205,0.9));
+  border: 1px solid rgba(140, 91, 47, 0.12);
+}
+.title-art-grid {
+  position: absolute;
+  inset: 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(140, 91, 47, 0.08);
+  background-image:
+    linear-gradient(rgba(140,91,47,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(140,91,47,0.06) 1px, transparent 1px);
+  background-size: 38px 38px;
+}
+.title-badge {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: rgba(255, 252, 248, 0.82);
+  color: var(--accent);
+  border: 1px solid rgba(140,91,47,0.12);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.title-orbit,
+.title-orbit-small,
+.title-orbit-leaf {
+  position: absolute;
+  border-radius: 50%;
+}
+.title-orbit {
+  width: 240px;
+  height: 240px;
+  border: 1px solid rgba(140,91,47,0.12);
+  left: 52%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.title-orbit-small {
+  width: 148px;
+  height: 148px;
+  border: 1px dashed rgba(199,141,77,0.22);
+  left: 52%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.title-center-mark {
+  position: absolute;
+  left: 52%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 110px;
+  height: 110px;
+  border-radius: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 44px;
+  color: var(--accent);
+  background: rgba(255, 250, 244, 0.94);
+  border: 1px solid rgba(140,91,47,0.16);
+  box-shadow: 0 18px 32px rgba(120, 80, 43, 0.14);
+}
+.title-orbit-leaf.one { width: 20px; height: 20px; background: rgba(199,141,77,0.85); top: 18%; left: 51%; }
+.title-orbit-leaf.two { width: 16px; height: 16px; background: rgba(93,125,99,0.75); bottom: 22%; right: 24%; }
+.title-orbit-leaf.three { width: 14px; height: 14px; background: rgba(140,91,47,0.72); top: 55%; left: 20%; }
+.title-note {
+  display: grid;
+  gap: 10px;
+  padding: 18px 20px;
+  border-radius: 24px;
+  background: rgba(255, 249, 240, 0.75);
+  border: 1px solid rgba(140,91,47,0.12);
+}
+.title-note strong { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.title-note span { color: var(--text-soft); font-size: 14px; line-height: 1.6; }
+
+.video-slide .label,
+.guests-slide .label,
+.events-intro-slide .label,
+.thanks-slide .label {
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+.video-slide h2,
+.guests-slide h2,
+.events-intro-slide h1,
+.thanks-slide h1 {
+  color: var(--text);
+}
+.video-slide video {
+  width: min(82%, 980px);
+  max-height: 64vh;
+  border-radius: 22px;
+  background: #000;
+  border: 1px solid rgba(140, 91, 47, 0.14);
+  box-shadow: var(--shadow);
+}
+
+.guests-slide { padding-inline: 60px; }
+.guests-slide h2 { font-size: clamp(2.5rem, 4vw, 3.6rem); margin-bottom: 38px; }
+.guest-cards { display: flex; gap: 34px; justify-content: center; flex-wrap: wrap; }
+.guest-card {
+  width: 320px;
+  padding: 28px 26px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255,250,243,0.86), rgba(255,247,237,0.70));
+  border: 1px solid rgba(140,91,47,0.12);
+  box-shadow: 0 20px 40px rgba(92, 62, 35, 0.10);
+}
+.guest-photo {
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  overflow: hidden;
+  border: 4px solid rgba(199,141,77,0.48);
+  background: rgba(255,255,255,0.66);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.guest-photo img { width: 100%; height: 100%; object-fit: cover; }
+.guest-card h3 { font-size: 30px; margin-bottom: 8px; color: var(--text); }
+.guest-card p { color: var(--text-soft); font-size: 14px; line-height: 1.6; }
+
+.events-intro-slide h1 { font-size: clamp(3rem, 5vw, 5rem); margin-bottom: 16px; }
+.events-intro-slide h1 .accent { color: var(--accent); }
+.events-intro-slide p { color: var(--text-soft); font-size: 18px; max-width: 780px; line-height: 1.8; }
+
+.event-slide { flex-direction: row; align-items: stretch; padding: 0; }
+.event-timeline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--timeline-w);
+  height: 100vh;
+  padding: 82px 16px 84px;
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(255,248,240,0.9), rgba(247,239,226,0.76));
+  border-right: 1px solid rgba(140,91,47,0.12);
+  backdrop-filter: blur(20px);
+  z-index: 70;
+}
+.event-timeline::-webkit-scrollbar { width: 6px; }
+.event-timeline::-webkit-scrollbar-thumb { background: rgba(140,91,47,0.22); border-radius: 999px; }
+.timeline-item {
+  padding: 14px 16px 14px 18px;
+  border-radius: 18px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  text-align: left;
+  margin-bottom: 8px;
+}
+.timeline-item:hover { transform: translateX(3px); background: rgba(255,255,255,0.46); border-color: rgba(140,91,47,0.08); }
+.timeline-item.active {
+  background: linear-gradient(135deg, rgba(140,91,47,0.12), rgba(199,141,77,0.06));
+  border-color: rgba(140,91,47,0.12);
+  box-shadow: 0 10px 18px rgba(90, 60, 34, 0.08);
+}
+.timeline-item .t-date {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--accent);
+}
+.timeline-item .t-title {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 700;
+}
+.timeline-item.active .t-title { color: var(--text); }
+
+.event-shell {
+  width: 100%;
+  height: 100%;
+  margin-left: var(--timeline-w);
+  padding: 86px 34px 52px;
+  overflow: hidden;
+}
+.event-main {
+  width: 100%;
+  height: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  border-radius: 34px;
+  background: linear-gradient(180deg, rgba(255,251,246,0.88), rgba(255,247,238,0.68));
+  border: 1px solid rgba(140,91,47,0.12);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.event-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 16% 20%, rgba(199,141,77,0.12), transparent 26%),
+    radial-gradient(circle at 86% 86%, rgba(93,125,99,0.11), transparent 24%);
+  pointer-events: none;
+}
+.event-content-viewport {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 34px;
+}
+.event-content-viewport::-webkit-scrollbar { width: 8px; }
+.event-content-viewport::-webkit-scrollbar-thumb { background: rgba(140,91,47,0.18); border-radius: 999px; }
+.event-content-inner {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 22px;
+}
+.event-header {
+  width: 100%;
+  max-width: 980px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.event-header .ev-date {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(140,91,47,0.08);
+  border: 1px solid rgba(140,91,47,0.12);
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+.event-header h2 {
+  font-size: clamp(2rem, 3vw, 3.1rem);
+  line-height: 1.08;
+  color: var(--text);
+}
+
+.collage {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 980px;
+  flex: 1;
+  min-height: 0;
+  grid-auto-rows: minmax(180px, 1fr);
+}
+
+.collage.count-1 {
+  grid-template-columns: 1fr;
+  min-height: min(56vh, 560px);
+}
+.collage.count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: min(56vh, 560px);
+}
+.collage.count-3 {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(180px, 1fr));
+  min-height: min(58vh, 600px);
+}
+.collage.count-3 .collage-item:first-child { grid-row: span 2; }
+.collage.count-4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(180px, 1fr));
+  min-height: min(58vh, 600px);
+}
+
+.collage-item {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  cursor: zoom-in;
+  background: rgba(255,255,255,0.62);
+  border: 1px solid rgba(140,91,47,0.10);
+  box-shadow: 0 18px 32px rgba(90, 60, 34, 0.10);
+}
+.collage-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s ease;
+}
+.collage-item:hover img { transform: scale(1.04); }
+.img-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px;
+  color: var(--text-faint);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(42, 29, 18, 0.82);
+  backdrop-filter: blur(14px);
+}
+.lightbox-stage {
+  position: relative;
+  width: min(96vw, 1400px);
+  height: min(92vh, 980px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+}
+.lightbox-overlay img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 20px;
+  box-shadow: 0 22px 70px rgba(0,0,0,0.28);
+}
+.lightbox-close {
+  position: fixed;
+  top: 24px;
+  right: 28px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 251, 245, 0.92);
+  border: 1px solid rgba(140,91,47,0.16);
+  color: var(--accent);
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 2001;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+}
+
+.thanks-slide h1 { font-size: clamp(3.4rem, 5vw, 5.5rem); color: var(--accent); margin-bottom: 12px; }
+.thanks-slide p { color: var(--text-soft); font-size: 18px; line-height: 1.7; }
+.ribbon-line {
+  width: 220px;
+  height: 1px;
+  margin: 18px auto 22px;
+  background: linear-gradient(90deg, transparent, rgba(140,91,47,0.55), transparent);
+}
+
+@media (max-width: 1180px) {
+  .title-panel { grid-template-columns: 1fr; min-height: auto; }
+  .title-art { min-height: 320px; }
+}
+
+@media (max-width: 980px) {
+  :root { --timeline-w: 100%; }
+  .event-timeline {
+    position: fixed;
+    top: 72px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    height: 112px;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid rgba(140,91,47,0.12);
+    border-radius: 24px;
+  }
+  .timeline-item { min-width: 210px; margin-bottom: 0; }
+  .event-shell {
+    margin-left: 0;
+    padding: 198px 16px 50px;
+  }
+  .event-content-viewport { padding: 22px; }
+  .collage,
+  .collage.count-1,
+  .collage.count-2,
+  .collage.count-3,
+  .collage.count-4 {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-auto-rows: minmax(220px, auto);
+    min-height: auto;
+  }
+  .collage.count-3 .collage-item:first-child { grid-row: auto; }
+}
+
+@media (max-width: 760px) {
+  .slide { padding: 24px; }
+  .title-slide { padding: 88px 18px 42px; }
+  .title-panel { padding: 26px 22px; border-radius: 28px; }
+  .title-description { font-size: 14px; }
+  .title-art { min-height: 250px; }
+  .title-center-mark { width: 86px; height: 86px; font-size: 34px; }
+  .title-orbit { width: 190px; height: 190px; }
+  .title-orbit-small { width: 122px; height: 122px; }
+  .guests-slide { padding-inline: 22px; }
+  .guest-card { width: min(100%, 340px); }
+  .guest-photo { width: 170px; height: 170px; }
+  .video-slide video { width: 100%; }
+  .nav-arrow { width: 48px; height: 48px; font-size: 24px; }
+  .top-bar { top: 12px; gap: 8px; }
+  .top-bar-btn, .slide-counter { padding: 8px 12px; font-size: 11px; }
+  .event-timeline { top: 60px; }
+  .lightbox-overlay { padding: 16px; }
+  .lightbox-stage { width: 100%; height: min(88vh, 720px); padding: 8px; }
+  .lightbox-close { top: 16px; right: 16px; }
+}
+`;
+
+function Lightbox({ src, onClose }) {
+  const overlayRef = useRef(null);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    gsap.fromTo(
+      overlayRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.22, ease: "power2.out" },
+    );
+    gsap.fromTo(
+      imgRef.current,
+      { opacity: 0, scale: 0.92 },
+      { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" },
+    );
+
+    const handleKey = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [onClose]);
+
+  const handleOverlayClick = (e) => {
+    if (e.target === overlayRef.current) onClose();
+  };
+
+  return (
+    <div
+      className="lightbox-overlay"
+      ref={overlayRef}
+      onClick={handleOverlayClick}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Image preview"
+    >
+      <button
+        className="lightbox-close"
+        onClick={onClose}
+        aria-label="Close image preview"
+      >
+        ✕
+      </button>
+      <div className="lightbox-stage">
+        <img ref={imgRef} src={src} alt="Zoomed event view" />
+      </div>
+    </div>
+  );
+}
+
+function SafeImage({ src, alt, fallback }) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
+  if (failed) {
+    return <span className="img-fallback">{fallback}</span>;
+  }
+
+  return <img src={src} alt={alt} onError={() => setFailed(true)} />;
+}
+
+function TitleSlide() {
+  return (
+    <div className="slide title-slide">
+      <div className="title-panel">
+        <div className="title-copy">
+          <div className="title-kicker">
+            Rotary Club of Roha · District 3131
+          </div>
+          {/* <div className="emblem">✦</div> */}
+          <h1>
+            Rotary Club <span className="accent">of Roha</span>
+          </h1>
+          <h2>13th Installation Ceremony</h2>
+          <p className="title-description">
+            Celebrating leadership, service, fellowship, and the moments that
+            shaped our shared journey through the year.
+          </p>
+        </div>
+
+        <div className="title-side">
+          <div className="title-art">
+            <div className="title-art-grid" />
+            <div className="title-badge">Annual Presentation</div>
+            <div className="title-orbit" />
+            <div className="title-orbit-small" />
+            <div className="title-center-mark">⚙</div>
+            <div className="title-orbit-leaf one" />
+            <div className="title-orbit-leaf two" />
+            <div className="title-orbit-leaf three" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VideoSlide({ label, title, src, isActive }) {
+  return (
+    <div className="slide video-slide">
+      <div className="label">{label}</div>
+      <h2>{title}</h2>
+      <video key={src} src={src} controls playsInline autoPlay={isActive}>
+        Your browser does not support video playback.
+      </video>
+    </div>
+  );
+}
+
+function GuestsSlide() {
+  return (
+    <div className="slide guests-slide">
+      <div className="label">Welcome</div>
+      <h2>Our Distinguished Guests</h2>
+      <div className="guest-cards">
+        <div className="guest-card">
+          <div className="guest-photo">
+            <SafeImage
+              src="/media/guests/chief-guest.jpg"
+              alt="Rtn. Nitin Dhamale"
+              fallback={
+                <>
+                  Add photo at
+                  <br />
+                  /media/guests/chief-guest.jpg
+                </>
+              }
+            />
+          </div>
+          <h3>Rtn. Nitin Dhamale</h3>
+          <p>Chief Guest — District Governor Elect 2026-27</p>
+        </div>
+
+        <div className="guest-card">
+          <div className="guest-photo">
+            <SafeImage
+              src="/media/guests/guest-of-honour.jpg"
+              alt="Rtn. Madhubala Nikam"
+              fallback={
+                <>
+                  Add photo at
+                  <br />
+                  /media/guests/guest-of-honour.jpg
+                </>
+              }
+            />
+          </div>
+          <h3>Rtn. Madhubala Nikam</h3>
+          <p>Guest of Honour — Assistant Governor Elect 2026-27</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EventsIntroSlide() {
+  return (
+    <div className="slide events-intro-slide">
+      <div className="label">Highlights</div>
+      <h1>
+        Our Year <span className="accent">in Service</span>
+      </h1>
+      <p>
+        A journey through community projects, fellowship, outreach, and
+        celebration from Jul 2025 to Mar 2026.
+      </p>
+    </div>
+  );
+}
+
+function EventContent({ data, onLightboxChange }) {
+  const [lightboxSrc, setLightboxSrc] = useState(null);
+  const headerRef = useRef(null);
+  const collageRef = useRef(null);
+  const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    onLightboxChange(Boolean(lightboxSrc));
+  }, [lightboxSrc, onLightboxChange]);
+
+  useEffect(() => {
+    setLightboxSrc(null);
+  }, [data.id]);
+
+  useEffect(() => {
+    gsap.fromTo(
+      wrapperRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.22, ease: "power1.out" },
+    );
+    gsap.fromTo(
+      headerRef.current,
+      { y: -20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.42, ease: "power3.out" },
+    );
+
+    const items = collageRef.current
+      ? collageRef.current.querySelectorAll(".collage-item")
+      : [];
+    gsap.fromTo(
+      items,
+      { y: 26, opacity: 0, scale: 0.97 },
+      {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.45,
+        ease: "power3.out",
+        stagger: 0.06,
+        delay: 0.06,
+      },
+    );
+  }, [data.id]);
+
+  const collageCount = Math.min(data.images.length, 4);
+
+  return (
+    <div className="event-content-inner" ref={wrapperRef}>
+      <div className="event-header" ref={headerRef}>
+        <span className="ev-date">{data.displayDate}</span>
+        <h2>{data.title}</h2>
+      </div>
+
+      <div className={`collage count-${collageCount}`} ref={collageRef}>
+        {data.images.slice(0, collageCount).map((src, idx) => (
+          <div
+            className="collage-item"
+            key={`${data.id}-${src}`}
+            onClick={() => setLightboxSrc(src)}
+          >
+            <SafeImage
+              src={src}
+              alt={`${data.title} - ${idx + 1}`}
+              fallback={
+                <>
+                  Image {idx + 1}
+                  <br />
+                  /media/events/{data.id}/img{idx + 1}.jpg
+                </>
+              }
+            />
+          </div>
+        ))}
+      </div>
+
+      {lightboxSrc && (
+        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      )}
+    </div>
+  );
+}
+
+function EventTimeline({ activeId, onJumpToEvent }) {
+  const timelineRef = useRef(null);
+
+  useEffect(() => {
+    if (!timelineRef.current) return;
+    const activeEl = timelineRef.current.querySelector(".timeline-item.active");
+    if (activeEl)
+      activeEl.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+  }, [activeId]);
+
+  return (
+    <div className="event-timeline" ref={timelineRef}>
+      {events.map((ev) => (
+        <div
+          key={ev.id}
+          className={`timeline-item ${ev.id === activeId ? "active" : ""}`}
+          onClick={() => onJumpToEvent(ev.id)}
+        >
+          <span className="t-date">{ev.displayDate}</span>
+          <span className="t-title">{ev.title}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ThanksSlide() {
+  return (
+    <div className="slide thanks-slide">
+      <div className="label">With Gratitude</div>
+      <h1>Thank You</h1>
+      <div className="ribbon-line" />
+      <p>For your continued support, encouragement, and partnership.</p>
+      <p>Rotary Club of Roha — 13th Installation Ceremony</p>
+    </div>
+  );
+}
+
+export default function App() {
+  const [index, setIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const containerRef = useRef(null);
+  const isAnimating = useRef(false);
+
+  useEffect(() => {
+    const styleEl = document.createElement("style");
+    styleEl.textContent = STYLES;
+    document.head.appendChild(styleEl);
+    return () => document.head.removeChild(styleEl);
+  }, []);
+
+  const eventIdToIndex = useMemo(() => {
+    const map = {};
+    slideStructure.forEach((s, i) => {
+      if (s.type === "event") map[s.data.id] = i;
+    });
+    return map;
+  }, []);
+
+  const isEventSlide = useCallback(
+    (i) => slideStructure[i]?.type === "event",
+    [],
+  );
+
+  const goTo = useCallback(
+    (newIndex, dir = 1) => {
+      if (isAnimating.current || isLightboxOpen) return;
+      if (newIndex < 0 || newIndex >= TOTAL) return;
+      if (newIndex === index) return;
+
+      isAnimating.current = true;
+      const container = containerRef.current;
+      const offset = dir > 0 ? 60 : -60;
+      const bothEventSlides = isEventSlide(index) && isEventSlide(newIndex);
+
+      if (bothEventSlides) {
+        setIndex(newIndex);
+        isAnimating.current = false;
+        return;
+      }
+
+      gsap
+        .timeline({
+          onComplete: () => {
+            isAnimating.current = false;
+          },
+        })
+        .to(container, {
+          opacity: 0,
+          x: -offset,
+          duration: 0.26,
+          ease: "power2.in",
+          onComplete: () => setIndex(newIndex),
+        })
+        .set(container, { x: offset })
+        .to(container, {
+          opacity: 1,
+          x: 0,
+          duration: 0.34,
+          ease: "power2.out",
+        });
+    },
+    [index, isEventSlide, isLightboxOpen],
+  );
+
+  const next = useCallback(() => goTo(index + 1, 1), [goTo, index]);
+  const prev = useCallback(() => goTo(index - 1, -1), [goTo, index]);
+  const goFirst = useCallback(() => goTo(0, -1), [goTo]);
+  const goLast = useCallback(() => goTo(TOTAL - 1, 1), [goTo]);
+
+  const jumpToEvent = useCallback(
+    (eventId) => {
+      if (isLightboxOpen) return;
+      const target = eventIdToIndex[eventId];
+      if (target === undefined) return;
+      goTo(target, target > index ? 1 : -1);
+    },
+    [eventIdToIndex, goTo, index, isLightboxOpen],
+  );
+
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (isLightboxOpen) return;
+
+      if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
+        e.preventDefault();
+        next();
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        prev();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        goFirst();
+      } else if (e.key === "End") {
+        e.preventDefault();
+        goLast();
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [next, prev, goFirst, goLast, isLightboxOpen]);
+
+  const current = slideStructure[index];
+  const onEventSlide = current.type === "event";
+
+  const renderMainSlide = () => {
+    switch (current.type) {
+      case "title":
+        return <TitleSlide />;
+      case "anthem":
+        return (
+          <VideoSlide
+            label="National Anthem"
+            title="Jana Gana Mana"
+            src="/media/videos/national-anthem.mp4"
+            isActive={true}
+          />
+        );
+      case "guests":
+        return <GuestsSlide />;
+      case "profile-video":
+        return (
+          <VideoSlide
+            label="Profile"
+            title="Rtn. Nitin Dhamale"
+            src="/media/videos/nitin-dhamale-profile.mp4"
+            isActive={true}
+          />
+        );
+      case "events-intro":
+        return <EventsIntroSlide />;
+      case "event":
+        return (
+          <div className="event-shell">
+            <div className="event-main">
+              <div className="event-content-viewport">
+                <EventContent
+                  data={current.data}
+                  onLightboxChange={setIsLightboxOpen}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      case "thanks":
+        return <ThanksSlide />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="app">
+      {!isLightboxOpen && (
+        <>
+          <div className="top-bar">
+            <button className="top-bar-btn" onClick={goFirst}>
+              ⏮ First
+            </button>
+            <div className="slide-counter">
+              {index + 1} / {TOTAL}
+            </div>
+            <button className="top-bar-btn" onClick={goLast}>
+              Last ⏭
+            </button>
+          </div>
+
+          {onEventSlide && (
+            <EventTimeline
+              activeId={current.data.id}
+              onJumpToEvent={jumpToEvent}
+            />
+          )}
+
+          <div
+            className="nav-arrow left"
+            onClick={prev}
+            style={{ visibility: index === 0 ? "hidden" : "visible" }}
+          >
+            ‹
+          </div>
+          <div
+            className="nav-arrow right"
+            onClick={next}
+            style={{ visibility: index === TOTAL - 1 ? "hidden" : "visible" }}
+          >
+            ›
+          </div>
+
+          <div className="progress-bar-track">
+            <div
+              className="progress-bar-fill"
+              style={{ width: `${((index + 1) / TOTAL) * 100}%` }}
+            />
+          </div>
+        </>
+      )}
+
+      <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
+        {renderMainSlide()}
+      </div>
+    </div>
+  );
+}
