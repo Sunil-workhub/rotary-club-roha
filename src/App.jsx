@@ -466,16 +466,17 @@ button { font: inherit; }
   display: grid;
   grid-template-rows: 1fr auto;
   gap: 16px;
+  background: url("/media/logo.png") center / cover no-repeat;
 }
 .title-art {
   position: relative;
   overflow: hidden;
   border-radius: 30px;
   min-height: 100%;
-  background:
-    radial-gradient(circle at 30% 24%, rgba(255,255,255,0.9), transparent 26%),
-    radial-gradient(circle at 75% 75%, rgba(199,141,77,0.32), transparent 28%),
-    linear-gradient(155deg, rgba(255,251,247,0.95), rgba(236,224,205,0.9));
+  // background:
+  //   radial-gradient(circle at 30% 24%, rgba(255,255,255,0.9), transparent 26%),
+  //   radial-gradient(circle at 75% 75%, rgba(199,141,77,0.32), transparent 28%),
+  //   linear-gradient(155deg, rgba(255,251,247,0.95), rgba(236,224,205,0.9));
   border: 1px solid rgba(140, 91, 47, 0.12);
 }
 .title-art-grid {
@@ -660,7 +661,7 @@ button { font: inherit; }
 .timeline-item.active .t-title { color: var(--text); }
 
 .event-shell {
-  width: 100%;
+  width: calc(100% - var(--timeline-w));
   height: 100%;
   margin-left: var(--timeline-w);
   padding: 86px 34px 52px;
@@ -692,19 +693,17 @@ button { font: inherit; }
   z-index: 2;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden; /* Fix layout: Prevent global layout scroll container behavior */
   padding: 34px;
 }
-.event-content-viewport::-webkit-scrollbar { width: 8px; }
-.event-content-viewport::-webkit-scrollbar-thumb { background: rgba(140,91,47,0.18); border-radius: 999px; }
 .event-content-inner {
-  min-height: 100%;
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  gap: 22px;
+  gap: 20px;
 }
 .event-header {
   width: 100%;
@@ -716,7 +715,7 @@ button { font: inherit; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 18px;
+  padding: 6px 16px;
   border-radius: 999px;
   background: rgba(140,91,47,0.08);
   border: 1px solid rgba(140,91,47,0.12);
@@ -725,42 +724,39 @@ button { font: inherit; }
   letter-spacing: 0.16em;
   text-transform: uppercase;
   font-weight: 800;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 .event-header h2 {
-  font-size: clamp(2rem, 3vw, 3.1rem);
-  line-height: 1.08;
+  font-size: clamp(1.8rem, 2.5vw, 2.8rem);
+  line-height: 1.1;
   color: var(--text);
 }
 
+/* REWORKED COLLAGE COMPONENT LAYOUTS */
 .collage {
   display: grid;
   gap: 16px;
   width: 100%;
-  max-width: 980px;
+  max-width: 1100px;
   flex: 1;
-  min-height: 0;
-  grid-auto-rows: minmax(180px, 1fr);
+  min-height: 0; /* Important: Allows grid items to shrink and fit exactly inside flexbox bounds */
 }
 
 .collage.count-1 {
   grid-template-columns: 1fr;
-  min-height: min(56vh, 560px);
 }
 .collage.count-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  min-height: min(56vh, 560px);
 }
 .collage.count-3 {
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  grid-template-rows: repeat(2, minmax(180px, 1fr));
-  min-height: min(58vh, 600px);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 .collage.count-3 .collage-item:first-child { grid-row: span 2; }
+
 .collage.count-4 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(180px, 1fr));
-  min-height: min(58vh, 600px);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
 .collage-item {
@@ -772,11 +768,12 @@ button { font: inherit; }
   cursor: zoom-in;
   background: rgba(255,255,255,0.62);
   border: 1px solid rgba(140,91,47,0.10);
-  box-shadow: 0 18px 32px rgba(90, 60, 34, 0.10);
+  box-shadow: 0 14px 28px rgba(90, 60, 34, 0.08);
 }
 .collage-item img {
   width: 100%;
   height: 100%;
+  max-width: 100%; /* Force browser layout recalculations inside grid tracks */
   object-fit: cover;
   display: block;
   transition: transform 0.45s ease;
@@ -880,7 +877,8 @@ button { font: inherit; }
     margin-left: 0;
     padding: 198px 16px 50px;
   }
-  .event-content-viewport { padding: 22px; }
+  .event-content-viewport { padding: 22px; overflow-y: auto; }
+  .event-content-inner { height: auto; }
   .collage,
   .collage.count-1,
   .collage.count-2,
@@ -890,6 +888,7 @@ button { font: inherit; }
     grid-template-rows: auto;
     grid-auto-rows: minmax(220px, auto);
     min-height: auto;
+    flex: none;
   }
   .collage.count-3 .collage-item:first-child { grid-row: auto; }
 }
@@ -999,7 +998,6 @@ function TitleSlide() {
           <div className="title-kicker">
             Rotary Club of Roha · District 3131
           </div>
-          {/* <div className="emblem">✦</div> */}
           <h1>
             Rotary Club <span className="accent">of Roha</span>
           </h1>
@@ -1012,14 +1010,14 @@ function TitleSlide() {
 
         <div className="title-side">
           <div className="title-art">
-            <div className="title-art-grid" />
+            {/* <div className="title-art-grid" />
             <div className="title-badge">Annual Presentation</div>
             <div className="title-orbit" />
             <div className="title-orbit-small" />
             <div className="title-center-mark">⚙</div>
             <div className="title-orbit-leaf one" />
             <div className="title-orbit-leaf two" />
-            <div className="title-orbit-leaf three" />
+            <div className="title-orbit-leaf three" /> */}
           </div>
         </div>
       </div>
@@ -1352,7 +1350,7 @@ export default function App() {
           <VideoSlide
             label="Profile"
             title="Rtn. Nitin Dhamale"
-            src="/media/videos/nitin-dhamale-profile.mp4"
+            src="/media/videos/nitin-dhamale-profile.mov"
             isActive={true}
           />
         );
@@ -1384,13 +1382,13 @@ export default function App() {
         <>
           <div className="top-bar">
             <button className="top-bar-btn" onClick={goFirst}>
-              ⏮ First
+              &lt;&lt; First
             </button>
             <div className="slide-counter">
               {index + 1} / {TOTAL}
             </div>
             <button className="top-bar-btn" onClick={goLast}>
-              Last ⏭
+              Last &gt;&gt;
             </button>
           </div>
 
@@ -1406,14 +1404,14 @@ export default function App() {
             onClick={prev}
             style={{ visibility: index === 0 ? "hidden" : "visible" }}
           >
-            ‹
+            &lt;
           </div>
           <div
             className="nav-arrow right"
             onClick={next}
             style={{ visibility: index === TOTAL - 1 ? "hidden" : "visible" }}
           >
-            ›
+            &gt;
           </div>
 
           <div className="progress-bar-track">
