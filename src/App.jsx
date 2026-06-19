@@ -353,10 +353,10 @@ const slideStructure = [
   { type: "title" },
   { type: "anthem" },
   { type: "guests" },
-  { type: "profile-video" },
   { type: "events-intro" },
   ...events.map((ev) => ({ type: "event", data: ev })),
   { type: "thanks" },
+  { type: "profile-video" },
 ];
 
 const TOTAL = slideStructure.length;
