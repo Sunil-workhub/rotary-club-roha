@@ -318,17 +318,24 @@ const eventList = [
     imageCount: 2,
   },
   {
+    id: 47,
+    title: "Assam - Meghalay Tour",
+    date: "2026-04-22",
+    displayDate: "2026",
+    imageCount: 4,
+  },
+  {
     id: 45,
     title: "मतिमंद मुलांच्या शाळेत ड्रेस वाटप कार्यक्रम",
-    date: "2026-06-16",
-    displayDate: "16 JUN 2026",
+    date: "2026-06-18",
+    displayDate: "18 JUN 2026",
     imageCount: 4,
   },
   {
     id: 46,
     title: "Machine Inauguration",
-    date: "2026-06-17",
-    displayDate: "17 Jun 2026",
+    date: "2026-06-18",
+    displayDate: "18 Jun 2026",
     imageCount: 4,
   },
 ];
