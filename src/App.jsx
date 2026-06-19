@@ -1,187 +1,346 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
 
+// imageCount: how many photos actually exist for this event, e.g.
+// /media/events/{id}/img1.jpg ... img{imageCount}.jpg
+// Not every event has 4 photos — set the real count per event here.
 const eventList = [
   {
     id: 1,
     title: "Doctor's Day",
     date: "2025-07-01",
     displayDate: "1 JULY 2025",
+    imageCount: 4,
   },
   {
     id: 2,
     title: "Paddy Planting (Rice Plantation)",
     date: "2025-07-20",
     displayDate: "20 JULY 2025",
+    imageCount: 4,
   },
   {
     id: 3,
     title: "Tree Plantation",
     date: "2025-08-01",
     displayDate: "AUGUST 2025",
+    imageCount: 4,
   },
   {
     id: 4,
     title: "Govinda Celebration",
     date: "2025-08-14",
     displayDate: "14 AUGUST 2025",
+    imageCount: 4,
   },
   {
     id: 5,
     title: "MEDICAL CAMP",
     date: "2025-08-17",
     displayDate: "17 AUGUST 2025",
+    imageCount: 4,
   },
   {
     id: 6,
     title: "12th President Inauguration",
     date: "2025-08-17",
     displayDate: "17 AUGUST 2025",
+    imageCount: 4,
   },
   {
     id: 7,
     title: "Ganpati Visarjan Chass Distribution",
     date: "2025-09-02",
     displayDate: "2 SEP 2025",
+    imageCount: 4,
   },
   {
     id: 8,
     title: "Ganpati Visarjan Chass Distribution",
     date: "2025-09-06",
     displayDate: "6 SEP 2025",
+    imageCount: 4,
   },
   {
     id: 9,
     title: "Ladies Picnic",
     date: "2025-09-16",
     displayDate: "16 SEP 2025",
+    imageCount: 4,
   },
   {
     id: 10,
     title: "Men's Tour - Goa",
     date: "2025-09-19",
     displayDate: "19 SEP 2025",
+    imageCount: 4,
   },
   {
     id: 11,
     title: "Navratri Celebration",
     date: "2025-09-28",
     displayDate: "28 SEP 2025",
+    imageCount: 4,
   },
   {
     id: 12,
     title: "Dhavir Maharaj Palkhi Sohala - Chass Distribution",
     date: "2025-10-03a",
     displayDate: "3 OCT 2025",
+    imageCount: 4,
   },
   {
     id: 13,
     title: "Dhavir Maharaj Palkhi Sohala - Dhokla 51 KG Distribution",
     date: "2025-10-03b",
     displayDate: "3 OCT 2025",
+    imageCount: 2,
   },
   {
     id: 14,
     title: "Dhavir Maharaj Palkhi Sohala - Idli 4000 Pieces Distribution",
     date: "2025-10-04",
     displayDate: "4 OCT 2025",
+    imageCount: 3,
   },
   {
     id: 15,
     title: "Blood Donation",
     date: "2025-10-07",
     displayDate: "7 OCT 2025",
+    imageCount: 4,
   },
   {
     id: 16,
     title: "Killa Primary School Cupboard Distribution",
     date: "2025-10-15",
     displayDate: "15 OCT 2025",
+    imageCount: 4,
   },
   {
     id: 17,
     title: "Membership Orientation - Dr. Parmar",
     date: "2025-10-20",
     displayDate: "OCT 2025",
+    imageCount: 4,
   },
   {
     id: 18,
     title: "Bicycle Distribution - ZP School Mhasali (4 Cycles)",
     date: "2025-11-14a",
     displayDate: "14 NOVEMBER 2025",
+    imageCount: 1,
   },
   {
     id: 19,
     title: "Bicycle Distribution - ZP School Barpe (3 Cycles)",
     date: "2025-11-14b",
     displayDate: "14 NOVEMBER 2025",
+    imageCount: 2,
   },
   {
     id: 20,
     title: "Bicycle Distribution - ZP School Mahagaov (7 Cycles)",
     date: "2025-11-14c",
     displayDate: "14 NOVEMBER 2025",
+    imageCount: 4,
   },
   {
     id: 21,
     title: "Socializing",
     date: "2025-11-27",
     displayDate: "27 NOVEMBER 2025",
+    imageCount: 1,
   },
   {
     id: 22,
     title: "New Year Celebration",
     date: "2025-12-31",
     displayDate: "31 DECEMBER 2025",
+    imageCount: 4,
   },
   {
     id: 23,
     title: "Calendar Opening",
     date: "2026-01-01",
     displayDate: "1 JAN 2026",
+    imageCount: 4,
   },
   {
     id: 24,
     title: "Sanegaon Ashram School Water Tank Donation",
     date: "2026-01-09",
     displayDate: "9 JAN 2026",
+    imageCount: 4,
   },
   {
     id: 25,
     title: "Rotary Popti Party",
     date: "2026-01-21",
     displayDate: "21 JAN 2026",
+    imageCount: 4,
   },
   {
     id: 26,
     title: "Sinhagad Fort Tour - Durga Abhas Mohim",
     date: "2026-02-01",
     displayDate: "1 FEB 2026",
+    imageCount: 4,
   },
   {
     id: 27,
     title: "Raigad Jillha Parished School - Navkhar Donated Chair & Table",
     date: "2026-02-27",
     displayDate: "27 FEB 2026",
+    imageCount: 4,
+  },
+  {
+    id: 31,
+    title: "Navkhar - school 1 Water purifier and 1 smart TV",
+    date: "2026-02-27",
+    displayDate: "27 FEB 2026",
+    imageCount: 4,
   },
   {
     id: 28,
     title: "Rotary Club Deccan Jimkhana Pune Donated Laptops to 5 Girls",
     date: "2026-03-06",
     displayDate: "6 MAR 2026",
+    imageCount: 4,
   },
   {
     id: 29,
     title: "Women's Day Saree Distribution by Godrej & Rotary Club of Roha",
     date: "2026-03-08",
     displayDate: "8 MAR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 30,
+    title: "Mammography Test",
+    date: "2026-04-04",
+    displayDate: "4 April 2026",
+    imageCount: 4,
+  },
+  {
+    id: 32,
+    title: "Dental Health Check Up - Roha School No.6 (Goargaonagar)",
+    date: "2026-03-20",
+    displayDate: "20 MAR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 33,
+    title:
+      "Dental Health Check Up - Late Mr. Vitthal Shankar - Raosaheb Kulkarni Vidymandir",
+    date: "2026-03-25",
+    displayDate: "25 MAR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 34,
+    title: "Dental Health Check Up - Roha Nagar Parishad School No. 1",
+    date: "2026-03-27",
+    displayDate: "27 MAR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 35,
+    title:
+      "Dental Health Check Up - School No. 10 (Late Mr. Prafulshet Bartake, Mangalwadi",
+    date: "2026-03-27",
+    displayDate: "27 MAR 2026",
+    imageCount: 3,
+  },
+  {
+    id: 36,
+    title:
+      "Dental Health Check Up - Param Pujya Pandurang Shastri Aatale Vidyamndir, Aastami",
+    date: "2026-03-28",
+    displayDate: "28 MAR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 37,
+    title: "Dental Health Check Up - Prerna School For Special Children, Roha",
+    date: "2026-03-30",
+    displayDate: "30 MAR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 38,
+    title:
+      "Dental Health Check Up - Roha Nagar Parishad Urdu School No. 5 (Aastami)",
+    date: "2026-04-06",
+    displayDate: "6 APR 2026",
+    imageCount: 2,
+  },
+  {
+    id: 39,
+    title: "Dental Health Check Up - Raigad Zilla Parishad School, Tamneshet ",
+    date: "2026-04-06",
+    displayDate: "6 APR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 40,
+    title: "Dental Health Check Up - Roha Nagar Parishad Urdu School No. 4",
+    date: "2026-04-08",
+    displayDate: "8 APR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 41,
+    title: "Dental Health Check Up - Government Ashram School, Sanegaon",
+    date: "2026-04-09",
+    displayDate: "9 APR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 42,
+    title: "Dental Health Check Up - M B Patil English School, Varse",
+    date: "2026-04-16",
+    displayDate: "16 APR 2026",
+    imageCount: 4,
+  },
+  {
+    id: 43,
+    title: "Dental Health Check Up - Raigad Zilla Parishad School, Usar",
+    date: "2026-04-18",
+    displayDate: "18 APR 2026",
+    imageCount: 2,
+  },
+  {
+    id: 44,
+    title: "Dental Health Check Up - Raigad Zilla Parishad School, Tambdi",
+    date: "2026-04-20",
+    displayDate: "20 APR 2026",
+    imageCount: 2,
+  },
+  {
+    id: 45,
+    title: "मतिमंद मुलांच्या शाळेत ड्रेस वाटप कार्यक्रम",
+    date: "2026-06-16",
+    displayDate: "16 JUN 2026",
+    imageCount: 4,
+  },
+  {
+    id: 46,
+    title: "Machine Inauguration",
+    date: "2026-06-17",
+    displayDate: "17 Jun 2026",
+    imageCount: 4,
   },
 ];
 
-const events = eventList.map((ev) => ({
-  ...ev,
-  images: [1, 2, 3, 4].map((n) => `/media/events/${ev.id}/img${n}.jpg`),
-}));
+const events = eventList.map((ev) => {
+  const count = ev.imageCount ?? 4;
+  const images = Array.from(
+    { length: count },
+    (_, i) => `/media/events/${ev.id}/img${i + 1}.jpg`,
+  );
+  return { ...ev, images };
+});
 
 const slideStructure = [
   { type: "title" },
@@ -473,10 +632,6 @@ button { font: inherit; }
   overflow: hidden;
   border-radius: 30px;
   min-height: 100%;
-  // background:
-  //   radial-gradient(circle at 30% 24%, rgba(255,255,255,0.9), transparent 26%),
-  //   radial-gradient(circle at 75% 75%, rgba(199,141,77,0.32), transparent 28%),
-  //   linear-gradient(155deg, rgba(255,251,247,0.95), rgba(236,224,205,0.9));
   border: 1px solid rgba(140, 91, 47, 0.12);
 }
 .title-art-grid {
@@ -664,13 +819,13 @@ button { font: inherit; }
   width: calc(100% - var(--timeline-w));
   height: 100%;
   margin-left: var(--timeline-w);
-  padding: 86px 34px 52px;
+  padding: 78px 26px 44px;
   overflow: hidden;
 }
 .event-main {
   width: 100%;
   height: 100%;
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
   border-radius: 34px;
   background: linear-gradient(180deg, rgba(255,251,246,0.88), rgba(255,247,238,0.68));
@@ -693,8 +848,8 @@ button { font: inherit; }
   z-index: 2;
   width: 100%;
   height: 100%;
-  overflow: hidden; /* Fix layout: Prevent global layout scroll container behavior */
-  padding: 34px;
+  overflow: hidden;
+  padding: 22px 26px;
 }
 .event-content-inner {
   height: 100%;
@@ -703,7 +858,7 @@ button { font: inherit; }
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
 }
 .event-header {
   width: 100%;
@@ -715,81 +870,118 @@ button { font: inherit; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 16px;
+  padding: 4px 14px;
   border-radius: 999px;
   background: rgba(140,91,47,0.08);
   border: 1px solid rgba(140,91,47,0.12);
   color: var(--accent);
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   font-weight: 800;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 .event-header h2 {
-  font-size: clamp(1.8rem, 2.5vw, 2.8rem);
-  line-height: 1.1;
+  font-size: clamp(1.4rem, 2vw, 2.1rem);
+  line-height: 1.15;
   color: var(--text);
 }
 
-/* REWORKED COLLAGE COMPONENT LAYOUTS */
-.collage {
-  display: grid;
-  gap: 16px;
-  width: 100%;
-  max-width: 1100px;
-  flex: 1;
-  min-height: 0; /* Important: Allows grid items to shrink and fit exactly inside flexbox bounds */
-}
-
-.collage.count-1 {
-  grid-template-columns: 1fr;
-}
-.collage.count-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.collage.count-3 {
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.collage.count-3 .collage-item:first-child { grid-row: span 2; }
-
-.collage.count-4 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-
-.collage-item {
+/* IMAGE VIEWER: one image at a time, count adapts to however many the event actually has.
+   No max-width cap here — it fills all remaining width/height in the slide so a single
+   image gets as much space as possible. */
+.image-viewer {
   position: relative;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  border-radius: 22px;
-  cursor: zoom-in;
-  background: rgba(255,255,255,0.62);
-  border: 1px solid rgba(140,91,47,0.10);
-  box-shadow: 0 14px 28px rgba(90, 60, 34, 0.08);
-}
-.collage-item img {
   width: 100%;
-  height: 100%;
-  max-width: 100%; /* Force browser layout recalculations inside grid tracks */
-  object-fit: cover;
-  display: block;
-  transition: transform 0.45s ease;
-}
-.collage-item:hover img { transform: scale(1.04); }
-.img-fallback {
-  position: absolute;
-  inset: 0;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 16px;
-  color: var(--text-faint);
-  font-size: 13px;
-  line-height: 1.6;
+}
+.image-viewer-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(140,91,47,0.12);
+  box-shadow: 0 16px 36px rgba(90, 60, 34, 0.10);
+  cursor: zoom-in;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-viewer-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.image-viewer .img-fallback {
+  position: absolute;
+}
+.image-viewer-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(140, 91, 47, 0.18);
+  background: rgba(255, 251, 245, 0.85);
+  color: var(--accent);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(92, 62, 35, 0.14);
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+}
+.image-viewer-nav:hover { transform: translateY(-50%) scale(1.07); background: rgba(255, 248, 239, 0.96); color: var(--accent-2); }
+.image-viewer-nav.prev { left: 14px; }
+.image-viewer-nav.next { right: 14px; }
+.image-viewer-nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+.image-viewer-counter {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  z-index: 5;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(46, 36, 24, 0.55);
+  color: #fdf6ec;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.image-viewer-dots {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.image-viewer-dots button {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: rgba(140, 91, 47, 0.22);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.image-viewer-dots button.active {
+  background: var(--accent);
+  transform: scale(1.25);
 }
 
 .lightbox-overlay {
@@ -879,18 +1071,8 @@ button { font: inherit; }
   }
   .event-content-viewport { padding: 22px; overflow-y: auto; }
   .event-content-inner { height: auto; }
-  .collage,
-  .collage.count-1,
-  .collage.count-2,
-  .collage.count-3,
-  .collage.count-4 {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-    grid-auto-rows: minmax(220px, auto);
-    min-height: auto;
-    flex: none;
-  }
-  .collage.count-3 .collage-item:first-child { grid-row: auto; }
+  .image-viewer { min-height: 280px; }
+  .image-viewer-frame { height: 280px; }
 }
 
 @media (max-width: 760px) {
@@ -913,6 +1095,7 @@ button { font: inherit; }
   .lightbox-overlay { padding: 16px; }
   .lightbox-stage { width: 100%; height: min(88vh, 720px); padding: 8px; }
   .lightbox-close { top: 16px; right: 16px; }
+  .image-viewer-nav { width: 40px; height: 40px; font-size: 18px; }
 }
 `;
 
@@ -1009,16 +1192,7 @@ function TitleSlide() {
         </div>
 
         <div className="title-side">
-          <div className="title-art">
-            {/* <div className="title-art-grid" />
-            <div className="title-badge">Annual Presentation</div>
-            <div className="title-orbit" />
-            <div className="title-orbit-small" />
-            <div className="title-center-mark">⚙</div>
-            <div className="title-orbit-leaf one" />
-            <div className="title-orbit-leaf two" />
-            <div className="title-orbit-leaf three" /> */}
-          </div>
+          <div className="title-art"></div>
         </div>
       </div>
     </div>
@@ -1098,19 +1272,56 @@ function EventsIntroSlide() {
   );
 }
 
-function EventContent({ data, onLightboxChange }) {
+/**
+ * Shows exactly one image at a time for the event, with prev/next arrows and
+ * dot indicators. The number of "pages" is simply data.images.length, so
+ * events with fewer than 4 images naturally show fewer dots and no extra
+ * blank frames.
+ *
+ * registerImageNav lets the parent (App) hook into this event's own
+ * image-by-image navigation so that pressing ArrowRight/ArrowLeft moves
+ * through this event's images first, and only advances to the next/previous
+ * SLIDE once you're at the last/first image.
+ */
+function EventContent({ data, onLightboxChange, registerImageNav }) {
+  const [imgIndex, setImgIndex] = useState(0);
   const [lightboxSrc, setLightboxSrc] = useState(null);
   const headerRef = useRef(null);
-  const collageRef = useRef(null);
+  const frameRef = useRef(null);
   const wrapperRef = useRef(null);
+
+  const images = data.images;
+  const imageCount = images.length;
+
+  // Reset to the first image whenever we land on a different event.
+  useEffect(() => {
+    setImgIndex(0);
+    setLightboxSrc(null);
+  }, [data.id]);
 
   useEffect(() => {
     onLightboxChange(Boolean(lightboxSrc));
   }, [lightboxSrc, onLightboxChange]);
 
+  const goNextImage = useCallback(() => {
+    setImgIndex((i) => (i < imageCount - 1 ? i + 1 : i));
+  }, [imageCount]);
+
+  const goPrevImage = useCallback(() => {
+    setImgIndex((i) => (i > 0 ? i - 1 : i));
+  }, []);
+
+  // Expose this event's image navigation + position to the parent so the
+  // main keyboard/arrow handlers can decide whether to move within the
+  // event's images or fall through to the next/previous slide.
   useEffect(() => {
-    setLightboxSrc(null);
-  }, [data.id]);
+    registerImageNav({
+      atFirstImage: imgIndex === 0,
+      atLastImage: imgIndex === imageCount - 1,
+      goNextImage,
+      goPrevImage,
+    });
+  }, [registerImageNav, imgIndex, imageCount, goNextImage, goPrevImage]);
 
   useEffect(() => {
     gsap.fromTo(
@@ -1123,26 +1334,18 @@ function EventContent({ data, onLightboxChange }) {
       { y: -20, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.42, ease: "power3.out" },
     );
-
-    const items = collageRef.current
-      ? collageRef.current.querySelectorAll(".collage-item")
-      : [];
-    gsap.fromTo(
-      items,
-      { y: 26, opacity: 0, scale: 0.97 },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: 0.45,
-        ease: "power3.out",
-        stagger: 0.06,
-        delay: 0.06,
-      },
-    );
   }, [data.id]);
 
-  const collageCount = Math.min(data.images.length, 4);
+  useEffect(() => {
+    if (!frameRef.current) return;
+    gsap.fromTo(
+      frameRef.current,
+      { opacity: 0, scale: 0.98 },
+      { opacity: 1, scale: 1, duration: 0.32, ease: "power3.out" },
+    );
+  }, [imgIndex, data.id]);
+
+  const currentSrc = images[imgIndex];
 
   return (
     <div className="event-content-inner" ref={wrapperRef}>
@@ -1151,27 +1354,75 @@ function EventContent({ data, onLightboxChange }) {
         <h2>{data.title}</h2>
       </div>
 
-      <div className={`collage count-${collageCount}`} ref={collageRef}>
-        {data.images.slice(0, collageCount).map((src, idx) => (
-          <div
-            className="collage-item"
-            key={`${data.id}-${src}`}
-            onClick={() => setLightboxSrc(src)}
-          >
-            <SafeImage
-              src={src}
-              alt={`${data.title} - ${idx + 1}`}
-              fallback={
-                <>
-                  Image {idx + 1}
-                  <br />
-                  /media/events/{data.id}/img{idx + 1}.jpg
-                </>
-              }
-            />
-          </div>
-        ))}
+      <div className="image-viewer">
+        <div
+          className="image-viewer-frame"
+          ref={frameRef}
+          onClick={() => setLightboxSrc(currentSrc)}
+        >
+          <SafeImage
+            key={currentSrc}
+            src={currentSrc}
+            alt={`${data.title} - ${imgIndex + 1}`}
+            fallback={
+              <>
+                Image {imgIndex + 1}
+                <br />
+                /media/events/{data.id}/img{imgIndex + 1}.jpg
+              </>
+            }
+          />
+
+          {imageCount > 1 && (
+            <span className="image-viewer-counter">
+              {imgIndex + 1} / {imageCount}
+            </span>
+          )}
+        </div>
+
+        {imageCount > 1 && (
+          <>
+            <button
+              type="button"
+              className="image-viewer-nav prev"
+              onClick={(e) => {
+                e.stopPropagation();
+                goPrevImage();
+              }}
+              disabled={imgIndex === 0}
+              aria-label="Previous image"
+            >
+              &lt;
+            </button>
+            <button
+              type="button"
+              className="image-viewer-nav next"
+              onClick={(e) => {
+                e.stopPropagation();
+                goNextImage();
+              }}
+              disabled={imgIndex === imageCount - 1}
+              aria-label="Next image"
+            >
+              &gt;
+            </button>
+          </>
+        )}
       </div>
+
+      {imageCount > 1 && (
+        <div className="image-viewer-dots">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              className={i === imgIndex ? "active" : ""}
+              onClick={() => setImgIndex(i)}
+              aria-label={`Go to image ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
 
       {lightboxSrc && (
         <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
@@ -1228,6 +1479,14 @@ export default function App() {
   const containerRef = useRef(null);
   const isAnimating = useRef(false);
 
+  // Holds the currently-mounted event slide's image navigation controls,
+  // so the global keyboard/arrow handlers can step through images before
+  // moving to the next/previous slide.
+  const imageNavRef = useRef(null);
+  const registerImageNav = useCallback((nav) => {
+    imageNavRef.current = nav;
+  }, []);
+
   useEffect(() => {
     const styleEl = document.createElement("style");
     styleEl.textContent = STYLES;
@@ -1259,6 +1518,9 @@ export default function App() {
       const offset = dir > 0 ? 60 : -60;
       const bothEventSlides = isEventSlide(index) && isEventSlide(newIndex);
 
+      // Clear any stale image-nav registration from the outgoing event slide.
+      imageNavRef.current = null;
+
       if (bothEventSlides) {
         setIndex(newIndex);
         isAnimating.current = false;
@@ -1289,8 +1551,26 @@ export default function App() {
     [index, isEventSlide, isLightboxOpen],
   );
 
-  const next = useCallback(() => goTo(index + 1, 1), [goTo, index]);
-  const prev = useCallback(() => goTo(index - 1, -1), [goTo, index]);
+  const next = useCallback(() => {
+    // On an event slide with more images to show, step the image forward
+    // instead of advancing to the next slide.
+    const nav = imageNavRef.current;
+    if (isEventSlide(index) && nav && !nav.atLastImage) {
+      nav.goNextImage();
+      return;
+    }
+    goTo(index + 1, 1);
+  }, [goTo, index, isEventSlide]);
+
+  const prev = useCallback(() => {
+    const nav = imageNavRef.current;
+    if (isEventSlide(index) && nav && !nav.atFirstImage) {
+      nav.goPrevImage();
+      return;
+    }
+    goTo(index - 1, -1);
+  }, [goTo, index, isEventSlide]);
+
   const goFirst = useCallback(() => goTo(0, -1), [goTo]);
   const goLast = useCallback(() => goTo(TOTAL - 1, 1), [goTo]);
 
@@ -1362,8 +1642,10 @@ export default function App() {
             <div className="event-main">
               <div className="event-content-viewport">
                 <EventContent
+                  key={current.data.id}
                   data={current.data}
                   onLightboxChange={setIsLightboxOpen}
+                  registerImageNav={registerImageNav}
                 />
               </div>
             </div>
