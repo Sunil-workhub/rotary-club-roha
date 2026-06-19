@@ -1,9 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
 
-// imageCount: how many photos actually exist for this event, e.g.
-// /media/events/{id}/img1.jpg ... img{imageCount}.jpg
-// Not every event has 4 photos — set the real count per event here.
 const eventList = [
   {
     id: 1,
@@ -774,7 +771,10 @@ button { font: inherit; }
 .events-intro-slide h1 .accent { color: var(--accent); }
 .events-intro-slide p { color: var(--text-soft); font-size: 18px; max-width: 780px; line-height: 1.8; }
 
+/* ── Event layout ─────────────────────────────────────────── */
 .event-slide { flex-direction: row; align-items: stretch; padding: 0; }
+
+/* Sidebar / Timeline */
 .event-timeline {
   position: fixed;
   top: 0;
@@ -787,9 +787,48 @@ button { font: inherit; }
   border-right: 1px solid rgba(140,91,47,0.12);
   backdrop-filter: blur(20px);
   z-index: 70;
+  /* Slide-in/out transition */
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+.event-timeline.collapsed {
+  transform: translateX(-100%);
 }
 .event-timeline::-webkit-scrollbar { width: 6px; }
 .event-timeline::-webkit-scrollbar-thumb { background: rgba(140,91,47,0.22); border-radius: 999px; }
+
+/* Toggle tab — always visible, anchored to the sidebar's right edge */
+.sidebar-toggle {
+  position: fixed;
+  top: 50%;
+  left: var(--timeline-w);
+  transform: translateY(-50%) translateX(0);
+  z-index: 80;
+  width: 28px;
+  height: 56px;
+  border-radius: 0 14px 14px 0;
+  border: 1px solid rgba(140,91,47,0.18);
+  border-left: none;
+  background: rgba(255, 251, 245, 0.92);
+  color: var(--accent);
+  backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 4px 0 16px rgba(92, 62, 35, 0.10);
+  transition: left 0.32s cubic-bezier(0.4, 0, 0.2, 1), background 0.18s ease, color 0.18s ease;
+  user-select: none;
+}
+.sidebar-toggle.collapsed {
+  left: 0;
+  border-radius: 0 14px 14px 0;
+  border-left: none;
+}
+.sidebar-toggle:hover { background: rgba(255, 248, 239, 0.98); color: var(--accent-2); }
+
 .timeline-item {
   padding: 14px 16px 14px 18px;
   border-radius: 18px;
@@ -822,10 +861,12 @@ button { font: inherit; }
 }
 .timeline-item.active .t-title { color: var(--text); }
 
+/* Shell that wraps the main event content area */
 .event-shell {
-  width: calc(100% - var(--timeline-w));
+  width: 100%;
   height: 100%;
-  margin-left: var(--timeline-w);
+  /* margin-left is set inline via JS so it can animate with sidebar */
+  transition: margin-left 0.32s cubic-bezier(0.4, 0, 0.2, 1), width 0.32s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 78px 26px 44px;
   overflow: hidden;
 }
@@ -894,9 +935,7 @@ button { font: inherit; }
   color: var(--text);
 }
 
-/* IMAGE VIEWER: one image at a time, count adapts to however many the event actually has.
-   No max-width cap here — it fills all remaining width/height in the slide so a single
-   image gets as much space as possible. */
+/* IMAGE VIEWER */
 .image-viewer {
   position: relative;
   width: 100%;
@@ -952,10 +991,7 @@ button { font: inherit; }
 .image-viewer-nav:hover { transform: translateY(-50%) scale(1.07); background: rgba(255, 248, 239, 0.96); color: var(--accent-2); }
 .image-viewer-nav.prev { left: 14px; }
 .image-viewer-nav.next { right: 14px; }
-.image-viewer-nav:disabled {
-  opacity: 0;
-  pointer-events: none;
-}
+.image-viewer-nav:disabled { opacity: 0; pointer-events: none; }
 .image-viewer-counter {
   position: absolute;
   bottom: 14px;
@@ -991,6 +1027,7 @@ button { font: inherit; }
   transform: scale(1.25);
 }
 
+/* LIGHTBOX */
 .lightbox-overlay {
   position: fixed;
   inset: 0;
@@ -1039,6 +1076,73 @@ button { font: inherit; }
   z-index: 2001;
   box-shadow: 0 14px 30px rgba(0,0,0,0.18);
 }
+/* Lightbox prev/next arrows */
+.lightbox-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2001;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(140,91,47,0.22);
+  background: rgba(255, 251, 245, 0.88);
+  color: var(--accent);
+  backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.22);
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+.lightbox-nav:hover { transform: translateY(-50%) scale(1.07); background: rgba(255,248,239,0.98); color: var(--accent-2); }
+.lightbox-nav.prev { left: 24px; }
+.lightbox-nav.next { right: 88px; }
+.lightbox-nav:disabled { opacity: 0.25; pointer-events: none; }
+/* Lightbox image counter */
+.lightbox-counter {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2001;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: rgba(46, 36, 24, 0.62);
+  color: #fdf6ec;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+/* Lightbox caption: which event/slide the current image belongs to */
+.lightbox-caption {
+  position: fixed;
+  bottom: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2001;
+  max-width: min(80vw, 720px);
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: rgba(46, 36, 24, 0.42);
+  color: #fdf6ec;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lightbox-caption .lc-date {
+  opacity: 0.78;
+  margin-right: 8px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
 
 .thanks-slide h1 { font-size: clamp(3.4rem, 5vw, 5.5rem); color: var(--accent); margin-bottom: 12px; }
 .thanks-slide p { color: var(--text-soft); font-size: 18px; line-height: 1.7; }
@@ -1071,11 +1175,21 @@ button { font: inherit; }
     border: 1px solid rgba(140,91,47,0.12);
     border-radius: 24px;
   }
-  .timeline-item { min-width: 210px; margin-bottom: 0; }
-  .event-shell {
-    margin-left: 0;
-    padding: 198px 16px 50px;
+  .event-timeline.collapsed { transform: translateY(calc(-100% - 80px)); }
+  .sidebar-toggle {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    top: 70px;
+    width: 56px;
+    height: 28px;
+    border-radius: 0 0 14px 14px;
+    border-top: none;
+    border-left: 1px solid rgba(140,91,47,0.18);
+    flex-direction: row;
+    font-size: 12px;
   }
+  .timeline-item { min-width: 210px; margin-bottom: 0; }
+  .event-shell { padding: 198px 16px 50px; }
   .event-content-viewport { padding: 22px; overflow-y: auto; }
   .event-content-inner { height: auto; }
   .image-viewer { min-height: 280px; }
@@ -1102,13 +1216,36 @@ button { font: inherit; }
   .lightbox-overlay { padding: 16px; }
   .lightbox-stage { width: 100%; height: min(88vh, 720px); padding: 8px; }
   .lightbox-close { top: 16px; right: 16px; }
+  .lightbox-nav.next { right: 76px; }
+  .lightbox-caption { bottom: 56px; max-width: 88vw; font-size: 11px; }
   .image-viewer-nav { width: 40px; height: 40px; font-size: 18px; }
 }
 `;
 
-function Lightbox({ src, onClose }) {
+// ── Lightbox with cross-event image navigation ──────────────────────────────
+// Navigates across ALL events' images, the same way the main (unzoomed) view
+// does: reaching the last image of an event rolls forward into the next
+// event's first image, and vice versa for "previous".
+function Lightbox({
+  allEvents,
+  startEventIndex,
+  startImageIndex,
+  onClose,
+  onPositionChange,
+}) {
   const overlayRef = useRef(null);
   const imgRef = useRef(null);
+  const [eventIdx, setEventIdx] = useState(startEventIndex);
+  const [imgIdx, setImgIdx] = useState(startImageIndex);
+
+  const currentEvent = allEvents[eventIdx];
+  const images = currentEvent.images;
+  const total = images.length;
+  const src = images[imgIdx];
+
+  const atVeryFirst = eventIdx === 0 && imgIdx === 0;
+  const atVeryLast =
+    eventIdx === allEvents.length - 1 && imgIdx === images.length - 1;
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -1125,19 +1262,88 @@ function Lightbox({ src, onClose }) {
       { opacity: 1, scale: 1, duration: 0.3, ease: "power3.out" },
     );
 
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Let parent know where we are, so the underlying slide/event view can
+  // stay in sync (and so closing the lightbox lands on the right slide).
+  useEffect(() => {
+    onPositionChange(eventIdx, imgIdx);
+  }, [eventIdx, imgIdx, onPositionChange]);
+
+  const animateTo = useCallback((dirForward) => {
+    gsap.fromTo(
+      imgRef.current,
+      { opacity: 0, x: dirForward ? 30 : -30 },
+      { opacity: 1, x: 0, duration: 0.24, ease: "power2.out" },
+    );
+  }, []);
+
+  const goNext = useCallback(() => {
+    setEventIdx((ei) => {
+      setImgIdx((ii) => {
+        const evImages = allEvents[ei].images;
+        if (ii < evImages.length - 1) {
+          animateTo(true);
+          return ii + 1;
+        }
+        return ii;
+      });
+      return ei;
+    });
+
+    // Handle rollover into next event (needs current state, so do it after
+    // checking same-event case using latest values via functional updates).
+    setEventIdx((ei) => {
+      const evImages = allEvents[ei].images;
+      if (imgIdx < evImages.length - 1) {
+        return ei; // stayed within the same event
+      }
+      if (ei < allEvents.length - 1) {
+        animateTo(true);
+        setImgIdx(0);
+        return ei + 1;
+      }
+      return ei; // already at the very last image overall
+    });
+  }, [allEvents, animateTo, imgIdx]);
+
+  const goPrev = useCallback(() => {
+    setEventIdx((ei) => {
+      if (imgIdx > 0) {
+        animateTo(false);
+        setImgIdx((ii) => ii - 1);
+        return ei;
+      }
+      if (ei > 0) {
+        const prevImages = allEvents[ei - 1].images;
+        animateTo(false);
+        setImgIdx(prevImages.length - 1);
+        return ei - 1;
+      }
+      return ei; // already at the very first image overall
+    });
+  }, [allEvents, animateTo, imgIdx]);
+
+  useEffect(() => {
     const handleKey = (e) => {
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        goNext();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        goPrev();
       }
     };
-
     window.addEventListener("keydown", handleKey);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKey);
-    };
-  }, [onClose]);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [onClose, goNext, goPrev]);
 
   const handleOverlayClick = (e) => {
     if (e.target === overlayRef.current) onClose();
@@ -1159,8 +1365,42 @@ function Lightbox({ src, onClose }) {
       >
         ✕
       </button>
+
+      <button
+        className="lightbox-nav prev"
+        onClick={goPrev}
+        disabled={atVeryFirst}
+        aria-label="Previous image"
+      >
+        &lt;
+      </button>
+      <button
+        className="lightbox-nav next"
+        onClick={goNext}
+        disabled={atVeryLast}
+        aria-label="Next image"
+      >
+        &gt;
+      </button>
+
+      {total > 1 && (
+        <div className="lightbox-counter">
+          {imgIdx + 1} / {total}
+        </div>
+      )}
+
+      {/* Small detail line: which event/slide this image belongs to */}
+      <div className="lightbox-caption" title={currentEvent.title}>
+        <span className="lc-date">{currentEvent.displayDate}</span>
+        {currentEvent.title}
+      </div>
+
       <div className="lightbox-stage">
-        <img ref={imgRef} src={src} alt="Zoomed event view" />
+        <img
+          ref={imgRef}
+          src={src}
+          alt={`${currentEvent.title} - ${imgIdx + 1}`}
+        />
       </div>
     </div>
   );
@@ -1168,15 +1408,10 @@ function Lightbox({ src, onClose }) {
 
 function SafeImage({ src, alt, fallback }) {
   const [failed, setFailed] = useState(false);
-
   useEffect(() => {
     setFailed(false);
   }, [src]);
-
-  if (failed) {
-    return <span className="img-fallback">{fallback}</span>;
-  }
-
+  if (failed) return <span className="img-fallback">{fallback}</span>;
   return <img src={src} alt={alt} onError={() => setFailed(true)} />;
 }
 
@@ -1197,7 +1432,6 @@ function TitleSlide() {
             shaped our shared journey through the year.
           </p>
         </div>
-
         <div className="title-side">
           <div className="title-art"></div>
         </div>
@@ -1241,7 +1475,6 @@ function GuestsSlide() {
           <h3>Rtn. Nitin Dhamale</h3>
           <p>Chief Guest — District Governor Elect 2026-27</p>
         </div>
-
         <div className="guest-card">
           <div className="guest-photo">
             <SafeImage
@@ -1279,20 +1512,13 @@ function EventsIntroSlide() {
   );
 }
 
-/**
- * Shows exactly one image at a time for the event, with prev/next arrows and
- * dot indicators. The number of "pages" is simply data.images.length, so
- * events with fewer than 4 images naturally show fewer dots and no extra
- * blank frames.
- *
- * registerImageNav lets the parent (App) hook into this event's own
- * image-by-image navigation so that pressing ArrowRight/ArrowLeft moves
- * through this event's images first, and only advances to the next/previous
- * SLIDE once you're at the last/first image.
- */
-function EventContent({ data, onLightboxChange, registerImageNav }) {
-  const [imgIndex, setImgIndex] = useState(0);
-  const [lightboxSrc, setLightboxSrc] = useState(null);
+function EventContent({
+  data,
+  imgIndex,
+  onImgIndexChange,
+  onLightboxOpen,
+  registerImageNav,
+}) {
   const headerRef = useRef(null);
   const frameRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -1300,27 +1526,14 @@ function EventContent({ data, onLightboxChange, registerImageNav }) {
   const images = data.images;
   const imageCount = images.length;
 
-  // Reset to the first image whenever we land on a different event.
-  useEffect(() => {
-    setImgIndex(0);
-    setLightboxSrc(null);
-  }, [data.id]);
-
-  useEffect(() => {
-    onLightboxChange(Boolean(lightboxSrc));
-  }, [lightboxSrc, onLightboxChange]);
-
   const goNextImage = useCallback(() => {
-    setImgIndex((i) => (i < imageCount - 1 ? i + 1 : i));
-  }, [imageCount]);
+    onImgIndexChange((i) => (i < imageCount - 1 ? i + 1 : i));
+  }, [imageCount, onImgIndexChange]);
 
   const goPrevImage = useCallback(() => {
-    setImgIndex((i) => (i > 0 ? i - 1 : i));
-  }, []);
+    onImgIndexChange((i) => (i > 0 ? i - 1 : i));
+  }, [onImgIndexChange]);
 
-  // Expose this event's image navigation + position to the parent so the
-  // main keyboard/arrow handlers can decide whether to move within the
-  // event's images or fall through to the next/previous slide.
   useEffect(() => {
     registerImageNav({
       atFirstImage: imgIndex === 0,
@@ -1365,7 +1578,7 @@ function EventContent({ data, onLightboxChange, registerImageNav }) {
         <div
           className="image-viewer-frame"
           ref={frameRef}
-          onClick={() => setLightboxSrc(currentSrc)}
+          onClick={() => onLightboxOpen(imgIndex)}
         >
           <SafeImage
             key={currentSrc}
@@ -1379,7 +1592,6 @@ function EventContent({ data, onLightboxChange, registerImageNav }) {
               </>
             }
           />
-
           {imageCount > 1 && (
             <span className="image-viewer-counter">
               {imgIndex + 1} / {imageCount}
@@ -1424,21 +1636,17 @@ function EventContent({ data, onLightboxChange, registerImageNav }) {
               key={i}
               type="button"
               className={i === imgIndex ? "active" : ""}
-              onClick={() => setImgIndex(i)}
+              onClick={() => onImgIndexChange(i)}
               aria-label={`Go to image ${i + 1}`}
             />
           ))}
         </div>
       )}
-
-      {lightboxSrc && (
-        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
-      )}
     </div>
   );
 }
 
-function EventTimeline({ activeId, onJumpToEvent }) {
+function EventTimeline({ activeId, onJumpToEvent, collapsed }) {
   const timelineRef = useRef(null);
 
   useEffect(() => {
@@ -1453,11 +1661,14 @@ function EventTimeline({ activeId, onJumpToEvent }) {
   }, [activeId]);
 
   return (
-    <div className="event-timeline" ref={timelineRef}>
+    <div
+      className={`event-timeline${collapsed ? " collapsed" : ""}`}
+      ref={timelineRef}
+    >
       {events.map((ev) => (
         <div
           key={ev.id}
-          className={`timeline-item ${ev.id === activeId ? "active" : ""}`}
+          className={`timeline-item${ev.id === activeId ? " active" : ""}`}
           onClick={() => onJumpToEvent(ev.id)}
         >
           <span className="t-date">{ev.displayDate}</span>
@@ -1480,16 +1691,21 @@ function ThanksSlide() {
   );
 }
 
+// ── Root App ──────────────────────────────────────────────────────────────────
 export default function App() {
   const [index, setIndex] = useState(0);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  // Sidebar collapsed by default
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  // Per-event image index, keyed by event id, so position is remembered
+  // when navigating away and back, and so it can be kept in sync with the lightbox.
+  const [imgIndexByEvent, setImgIndexByEvent] = useState({});
+  // Lightbox state: null = closed, { eventIndex, imageIndex } = open
+  const [lightbox, setLightbox] = useState(null);
+
   const containerRef = useRef(null);
   const isAnimating = useRef(false);
-
-  // Holds the currently-mounted event slide's image navigation controls,
-  // so the global keyboard/arrow handlers can step through images before
-  // moving to the next/previous slide.
   const imageNavRef = useRef(null);
+
   const registerImageNav = useCallback((nav) => {
     imageNavRef.current = nav;
   }, []);
@@ -1509,6 +1725,21 @@ export default function App() {
     return map;
   }, []);
 
+  // Maps a position within the flat `events` array to/from the slide index,
+  // used to keep the lightbox (which walks `events` directly) and the main
+  // slide deck (which walks `slideStructure`) in sync.
+  const eventArrayIndexToSlideIndex = useMemo(() => {
+    return events.map((ev) => eventIdToIndex[ev.id]);
+  }, [eventIdToIndex]);
+
+  const slideIndexToEventArrayIndex = useMemo(() => {
+    const map = {};
+    events.forEach((ev, i) => {
+      map[eventIdToIndex[ev.id]] = i;
+    });
+    return map;
+  }, [eventIdToIndex]);
+
   const isEventSlide = useCallback(
     (i) => slideStructure[i]?.type === "event",
     [],
@@ -1516,7 +1747,7 @@ export default function App() {
 
   const goTo = useCallback(
     (newIndex, dir = 1) => {
-      if (isAnimating.current || isLightboxOpen) return;
+      if (isAnimating.current || lightbox) return;
       if (newIndex < 0 || newIndex >= TOTAL) return;
       if (newIndex === index) return;
 
@@ -1525,7 +1756,6 @@ export default function App() {
       const offset = dir > 0 ? 60 : -60;
       const bothEventSlides = isEventSlide(index) && isEventSlide(newIndex);
 
-      // Clear any stale image-nav registration from the outgoing event slide.
       imageNavRef.current = null;
 
       if (bothEventSlides) {
@@ -1555,12 +1785,10 @@ export default function App() {
           ease: "power2.out",
         });
     },
-    [index, isEventSlide, isLightboxOpen],
+    [index, isEventSlide, lightbox],
   );
 
   const next = useCallback(() => {
-    // On an event slide with more images to show, step the image forward
-    // instead of advancing to the next slide.
     const nav = imageNavRef.current;
     if (isEventSlide(index) && nav && !nav.atLastImage) {
       nav.goNextImage();
@@ -1583,17 +1811,18 @@ export default function App() {
 
   const jumpToEvent = useCallback(
     (eventId) => {
-      if (isLightboxOpen) return;
+      if (lightbox) return;
       const target = eventIdToIndex[eventId];
       if (target === undefined) return;
       goTo(target, target > index ? 1 : -1);
     },
-    [eventIdToIndex, goTo, index, isLightboxOpen],
+    [eventIdToIndex, goTo, index, lightbox],
   );
 
   useEffect(() => {
     const handleKey = (e) => {
-      if (isLightboxOpen) return;
+      // Lightbox handles its own keys
+      if (lightbox) return;
 
       if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
         e.preventDefault();
@@ -1609,13 +1838,39 @@ export default function App() {
         goLast();
       }
     };
-
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [next, prev, goFirst, goLast, isLightboxOpen]);
+  }, [next, prev, goFirst, goLast, lightbox]);
 
   const current = slideStructure[index];
   const onEventSlide = current.type === "event";
+
+  // Sync the underlying slide deck to match wherever the lightbox has
+  // navigated to (it can roll across event boundaries), so closing the
+  // lightbox always lands on the correct slide and image.
+  const handleLightboxPositionChange = useCallback(
+    (eventArrayIdx, imageIdx) => {
+      const ev = events[eventArrayIdx];
+      const slideIdx = eventArrayIndexToSlideIndex[eventArrayIdx];
+      setImgIndexByEvent((prev) => ({ ...prev, [ev.id]: imageIdx }));
+      if (slideIdx !== undefined && slideIdx !== index) {
+        setIndex(slideIdx);
+      }
+    },
+    [eventArrayIndexToSlideIndex, index],
+  );
+
+  const setImgIndexForEvent = useCallback((eventId, updater) => {
+    setImgIndexByEvent((prevMap) => {
+      const prevVal = prevMap[eventId] ?? 0;
+      const nextVal =
+        typeof updater === "function" ? updater(prevVal) : updater;
+      return { ...prevMap, [eventId]: nextVal };
+    });
+  }, []);
+
+  // Timeline sidebar width for layout calculations
+  const SIDEBAR_W = "294px";
 
   const renderMainSlide = () => {
     switch (current.type) {
@@ -1643,21 +1898,40 @@ export default function App() {
         );
       case "events-intro":
         return <EventsIntroSlide />;
-      case "event":
+      case "event": {
+        const data = current.data;
+        const imgIndex = imgIndexByEvent[data.id] ?? 0;
         return (
-          <div className="event-shell">
+          <div
+            className="event-shell"
+            style={{
+              marginLeft: sidebarCollapsed ? "0" : SIDEBAR_W,
+              width: sidebarCollapsed ? "100%" : `calc(100% - ${SIDEBAR_W})`,
+            }}
+          >
             <div className="event-main">
               <div className="event-content-viewport">
                 <EventContent
-                  key={current.data.id}
-                  data={current.data}
-                  onLightboxChange={setIsLightboxOpen}
+                  key={data.id}
+                  data={data}
+                  imgIndex={imgIndex}
+                  onImgIndexChange={(updater) =>
+                    setImgIndexForEvent(data.id, updater)
+                  }
+                  onLightboxOpen={(startIdx) => {
+                    const eventArrayIdx = slideIndexToEventArrayIndex[index];
+                    setLightbox({
+                      eventIndex: eventArrayIdx,
+                      imageIndex: startIdx,
+                    });
+                  }}
                   registerImageNav={registerImageNav}
                 />
               </div>
             </div>
           </div>
         );
+      }
       case "thanks":
         return <ThanksSlide />;
       default:
@@ -1667,7 +1941,7 @@ export default function App() {
 
   return (
     <div className="app">
-      {!isLightboxOpen && (
+      {!lightbox && (
         <>
           <div className="top-bar">
             <button className="top-bar-btn" onClick={goFirst}>
@@ -1682,10 +1956,26 @@ export default function App() {
           </div>
 
           {onEventSlide && (
-            <EventTimeline
-              activeId={current.data.id}
-              onJumpToEvent={jumpToEvent}
-            />
+            <>
+              <EventTimeline
+                activeId={current.data.id}
+                onJumpToEvent={jumpToEvent}
+                collapsed={sidebarCollapsed}
+              />
+              {/* Sidebar toggle tab */}
+              <button
+                className={`sidebar-toggle${sidebarCollapsed ? " collapsed" : ""}`}
+                onClick={() => setSidebarCollapsed((v) => !v)}
+                aria-label={
+                  sidebarCollapsed
+                    ? "Show event timeline"
+                    : "Hide event timeline"
+                }
+                title={sidebarCollapsed ? "Show timeline" : "Hide timeline"}
+              >
+                {sidebarCollapsed ? "▶" : "◀"}
+              </button>
+            </>
           )}
 
           <div
@@ -1715,6 +2005,16 @@ export default function App() {
       <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
         {renderMainSlide()}
       </div>
+
+      {lightbox && (
+        <Lightbox
+          allEvents={events}
+          startEventIndex={lightbox.eventIndex}
+          startImageIndex={lightbox.imageIndex}
+          onClose={() => setLightbox(null)}
+          onPositionChange={handleLightboxPositionChange}
+        />
+      )}
     </div>
   );
 }
